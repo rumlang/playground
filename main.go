@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rumlang/rumplay/forms"
+	"github.com/rumlang/playground/forms"
 	"github.com/satori/go.uuid"
 	"github.com/trumae/valente"
 	"github.com/trumae/valente/status"

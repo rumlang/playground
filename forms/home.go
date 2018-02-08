@@ -43,7 +43,7 @@ func (form RumReplForm) Render(ws *websocket.Conn, app *valente.App, params []st
 	content := elements.Panel{}
 	content.AddClass("container")
 
-	content.AddElement(elements.Heading3{Text: "RumREPL"})
+	content.AddElement(elements.Heading3{Text: "The Rum Playground"})
 
 	rowbtn := elements.Panel{}
 	rowbtn.AddClass("row")
