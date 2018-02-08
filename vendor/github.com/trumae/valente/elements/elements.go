@@ -10,6 +10,16 @@ type Element interface {
 	String() string
 }
 
+//RawElement is an elementa to return raw html code
+type RawElement struct {
+	Raw string
+}
+
+//String emit html text for RawElement
+func (raw *RawElement) String() string {
+	return raw.Raw
+}
+
 //Base is an type base for all elements. This means that all Elements can use the attributes listed below.
 type Base struct {
 	ID      string
@@ -79,7 +89,7 @@ func (base Base) Attrs() string {
 	if len(base.Style) != 0 {
 		ret += " style='"
 		var keys []string
-		for key, _ := range base.Style {
+		for key := range base.Style {
 			keys = append(keys, key)
 		}
 		sort.Strings(keys)
@@ -90,7 +100,7 @@ func (base Base) Attrs() string {
 	}
 
 	var keys []string
-	for key, _ := range base.Data {
+	for key := range base.Data {
 		keys = append(keys, key)
 	}
 	sort.Strings(keys)

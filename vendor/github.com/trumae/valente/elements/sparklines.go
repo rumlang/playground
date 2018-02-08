@@ -11,12 +11,25 @@ import (
 const (
 	//Sparkline Graph types
 
+	//SparklineLine is a flag for an chart type using lines
 	SparklineLine = iota
+
+	//SparklineBar is a flag for an chart type using bar
 	SparklineBar
+
+	//SparklineTristate is a flag for an chart type using tristate
 	SparklineTristate
+
+	//SparklineDiscrete is a flag for an chart type using discrete
 	SparklineDiscrete
+
+	//SparklineBullet is a flag for an chart type using Bullet
 	SparklineBullet
+
+	//SparklinePie is a flag for an chart type using pie
 	SparklinePie
+
+	//SparklineBox is a flag for an chart type using box
 	SparklineBox
 )
 
@@ -29,24 +42,28 @@ type Sparkline struct {
 }
 
 //SetOption set a option value for a key
-func (sl *Sparkline) SetOption(key string, value string) {
-	if sl.Data == nil {
-		sl.Options = make(map[string]string)
+func (spark *Sparkline) SetOption(key string, value string) {
+	if spark.Data == nil {
+		spark.Options = make(map[string]string)
 	}
-	sl.Options[key] = value
+	spark.Options[key] = value
 }
 
 //RemoveOption delete a value in Data map
-func (sl *Sparkline) RemoveOption(key string) {
-	delete(sl.Options, key)
+func (spark *Sparkline) RemoveOption(key string) {
+	delete(spark.Options, key)
 }
 
 //String return string tag for Sparkline
 func (spark Sparkline) String() string {
 
 	if spark.ID == "" {
-		u1 := uuid.NewV4().String()[0:8]
-		spark.ID = u1
+		u1, err := uuid.NewV4()
+		if err != nil {
+			spark.ID = "spartline1"
+		} else {
+			spark.ID = u1.String()[0:8]
+		}
 	}
 
 	ret := fmt.Sprintf("<span id='%s'>...</span>", spark.ID)
@@ -62,7 +79,7 @@ func (spark Sparkline) String() string {
 	soptions := "{}"
 	if spark.Options != nil {
 		var keys []string
-		for key, _ := range spark.Options {
+		for key := range spark.Options {
 			keys = append(keys, key)
 		}
 		sort.Strings(keys)
