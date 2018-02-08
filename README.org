@@ -3,7 +3,7 @@ The Rumplay is a simple web repl to rumlang.
 * Install
 
 #+BEGIN_SRC 
-go install github.com/trumae/rumplay
+go install github.com/rumlang/rumplay
 #+END_SRC
 
 * Run
@@ -12,4 +12,4 @@ go install github.com/trumae/rumplay
 ./rumplay
 #+END_SRC
 
-
+  

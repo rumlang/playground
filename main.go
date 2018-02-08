@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/rumlang/rumplay/forms"
 	"github.com/satori/go.uuid"
-	"github.com/trumae/rumplay/forms"
 	"github.com/trumae/valente"
 	"github.com/trumae/valente/status"
 
@@ -141,7 +141,7 @@ func main() {
 		app.Run()
 	})
 
-	log.Println("Server running ...")
+	log.Println("Server running on port", port)
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		log.Println(err)
