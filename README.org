@@ -1,15 +1,15 @@
 The Rumplay is a simple web repl to rumlang.
 
-## Install
+* Install
 
-```
+#+BEGIN_SRC 
 go install github.com/trumae/rumplay
-```
+#+END_SRC
 
-## Run
+* Run
 
-```
+#+BEGIN_SRC 
 ./rumplay
-```
+#+END_SRC
 
 
