@@ -108,8 +108,7 @@ func main() {
 		}
 		idSession := string(bid)
 
-		var app *App
-		app = getSession(idSession)
+		app := getSession(idSession)
 		if app == nil {
 			su1, err := uuid.NewV4()
 			if err != nil {
