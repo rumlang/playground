@@ -1,0 +1,19 @@
+0.0.0.0
+
+timeouts 0
+
+root /srv/assets
+proxy / play:8000 {
+      except /js
+      header_upstream Host {host}
+      header_upstream X-Real-IP {remote}
+      header_upstream X-Forwarded-For {remote}
+      header_upstream X-Forwarded-Proto {scheme}
+      header_upstream Connection {>Connection}
+      header_upstream Upgrade {>Upgrade}
+      websocket
+}
+
+log stdout
+
+errors stdout
