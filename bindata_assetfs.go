@@ -9,10 +9,10 @@
 package main
 
 import (
-	"github.com/elazarl/go-bindata-assetfs"
 	"bytes"
 	"compress/gzip"
 	"fmt"
+	"github.com/elazarl/go-bindata-assetfs"
 	"io"
 	"io/ioutil"
 	"os"
@@ -204,9 +204,9 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"public/index.html": publicIndexHtml,
-	"public/index.html~": publicIndexHtml2,
-	"public/js/app.js": publicJsAppJs,
+	"public/index.html":               publicIndexHtml,
+	"public/index.html~":              publicIndexHtml2,
+	"public/js/app.js":                publicJsAppJs,
 	"public/js/jquery.blockUI.min.js": publicJsJqueryBlockuiMinJs,
 }
 
@@ -249,13 +249,14 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
+
 var _bintree = &bintree{nil, map[string]*bintree{
-	"public": &bintree{nil, map[string]*bintree{
-		"index.html": &bintree{publicIndexHtml, map[string]*bintree{}},
-		"index.html~": &bintree{publicIndexHtml2, map[string]*bintree{}},
-		"js": &bintree{nil, map[string]*bintree{
-			"app.js": &bintree{publicJsAppJs, map[string]*bintree{}},
-			"jquery.blockUI.min.js": &bintree{publicJsJqueryBlockuiMinJs, map[string]*bintree{}},
+	"public": {nil, map[string]*bintree{
+		"index.html":  {publicIndexHtml, map[string]*bintree{}},
+		"index.html~": {publicIndexHtml2, map[string]*bintree{}},
+		"js": {nil, map[string]*bintree{
+			"app.js":                {publicJsAppJs, map[string]*bintree{}},
+			"jquery.blockUI.min.js": {publicJsJqueryBlockuiMinJs, map[string]*bintree{}},
 		}},
 	}},
 }}
@@ -306,7 +307,6 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
-
 
 func assetFS() *assetfs.AssetFS {
 	assetInfo := func(path string) (os.FileInfo, error) {

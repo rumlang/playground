@@ -246,7 +246,7 @@ func TestDialCookieJar(t *testing.T) {
 		u.Scheme = "https"
 	}
 
-	cookies := []*http.Cookie{&http.Cookie{Name: "gorilla", Value: "ws", Path: "/"}}
+	cookies := []*http.Cookie{{Name: "gorilla", Value: "ws", Path: "/"}}
 	d.Jar.SetCookies(u, cookies)
 
 	ws, _, err := d.Dial(s.URL, nil)
