@@ -1,0 +1,17 @@
+version: "2"
+services:
+  play:
+    build: .
+    volumes:
+      - "./rumfiles:/go/src/github.com/rumlang/playground/rumfiles"
+    ports:
+      - 8000
+  caddy:
+    image: abiosoft/caddy
+    volumes:
+      - ./Caddyfile:/etc/Caddyfile
+      - ./public:/srv/assets
+    links:
+      - play:play
+    ports:
+      - 80:2015
