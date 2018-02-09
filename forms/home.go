@@ -15,6 +15,10 @@ import (
 	"github.com/trumae/valente/elements"
 )
 
+const (
+	RUMFILES_PATH = "./rumfiles/"
+)
+
 func rumParse(s string) (*parser.Value, error) {
 	v, err := parser.Parse(parser.NewSource(s))
 	if err != nil {
@@ -59,13 +63,13 @@ func codeToLoad(ws *websocket.Conn) (string, error) {
 		return "", err
 	}
 
-	fs := strings.Split(res, "?")
+	fs := strings.Split(res, "#")
 	if len(fs) > 2 {
 		return "", fmt.Errorf("Malformed URL")
 	}
 
 	if len(fs) == 2 {
-		code, err := ioutil.ReadFile(fs[1] + ".rum")
+		code, err := ioutil.ReadFile(RUMFILES_PATH + fs[1] + ".rum")
 		if err != nil {
 			return "", err
 		}
@@ -175,6 +179,7 @@ func cleanRumRepl(ws *websocket.Conn, app *valente.App, params []string) {
 	action.HTML(ws, "output", "")
 	action.HTML(ws, "shareurl", "")
 	action.Set(ws, "input", "")
+	action.Exec(ws, `location.assign("#")`)
 }
 
 func shareError(ws *websocket.Conn, msg string) {
@@ -193,15 +198,17 @@ func shareRumRepl(ws *websocket.Conn, app *valente.App, params []string) {
 		shareError(ws, fmt.Sprint("UUID", err))
 	}
 
-	err = ioutil.WriteFile(uuid.String()+".rum", []byte(code), 0644)
+	err = ioutil.WriteFile(RUMFILES_PATH+uuid.String()+".rum", []byte(code), 0644)
 	if err != nil {
 		shareError(ws, fmt.Sprint("Error saving code", err))
 	}
 
 	action.HTML(ws, "shareurl", `
              <div class="alert alert-success" role="alert">
-	       <b>URL to share:</b> http://playground.rumlang.org/?`+uuid.String()+
+	       <b>URL to share:</b> http://play.rumlang.org/#`+uuid.String()+
 		"</div>")
+	action.Exec(ws, `location.assign("#`+uuid.String()+`")`)
+
 }
 
 //Initialize inits the Rumrepl Form
