@@ -2,11 +2,14 @@ package forms
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
+	"strings"
 
 	"github.com/gorilla/websocket"
 	"github.com/rumlang/rum/parser"
 	"github.com/rumlang/rum/runtime"
+	"github.com/satori/go.uuid"
 	"github.com/trumae/valente"
 	"github.com/trumae/valente/action"
 	"github.com/trumae/valente/elements"
@@ -38,6 +41,40 @@ type RumReplForm struct {
 	valente.FormImpl
 }
 
+func codeToLoad(ws *websocket.Conn) (string, error) {
+	js := "ws.send(window.location.href);"
+
+	err := ws.WriteMessage(websocket.TextMessage, []byte(js))
+	if err != nil {
+		return "", err
+	}
+
+	_, bret, err := ws.ReadMessage()
+	if err != nil {
+		return "", err
+	}
+	res := string(bret)
+
+	if len(res) == 0 {
+		return "", err
+	}
+
+	fs := strings.Split(res, "?")
+	if len(fs) > 2 {
+		return "", fmt.Errorf("Malformed URL")
+	}
+
+	if len(fs) == 2 {
+		code, err := ioutil.ReadFile(fs[1] + ".rum")
+		if err != nil {
+			return "", err
+		}
+		return string(code), nil
+	}
+
+	return "", nil
+}
+
 //Render the initial html form to FormRumrepl
 func (form RumReplForm) Render(ws *websocket.Conn, app *valente.App, params []string) error {
 	content := elements.Panel{}
@@ -49,14 +86,24 @@ func (form RumReplForm) Render(ws *websocket.Conn, app *valente.App, params []st
 	rowbtn.AddClass("row")
 
 	btnRun := elements.Button{Text: "Run", PostBack: []string{"run"}}
-	btnRun.AddClass("btn btn-primary col-4")
+	btnRun.AddClass("btn btn-primary col-3")
+
+	btnShare := elements.Button{Text: "Share", PostBack: []string{"share"}}
+	btnShare.AddClass("btn btn-info col-3 offset-1")
 
 	btnClean := elements.Button{Text: "Clean", PostBack: []string{"clean"}}
-	btnClean.AddClass("btn btn-secondary col-4 offset-4")
+	btnClean.AddClass("btn btn-secondary col-3 offset-1")
 
 	rowbtn.AddElement(btnRun)
+	rowbtn.AddElement(btnShare)
 	rowbtn.AddElement(btnClean)
 	content.AddElement(rowbtn)
+
+	shareurl := elements.Panel{}
+	shareurl.ID = "shareurl"
+	shareurl.AddClass("row")
+	shareurl.SetStyle("margin-top", "15px")
+	content.AddElement(shareurl)
 
 	codeta := elements.TextArea{}
 	codeta.ID = "input"
@@ -79,6 +126,23 @@ func (form RumReplForm) Render(ws *websocket.Conn, app *valente.App, params []st
 	content.AddElement(output)
 
 	action.HTML(ws, "content", content.String())
+
+	action.Exec(ws, `
+          $("#input").on("change keyup paste", function() {
+             $("#shareurl").html("");
+          });
+        `)
+
+	code, err := codeToLoad(ws)
+	if err != nil {
+		shareError(ws, fmt.Sprint("Error loading code", err))
+	}
+
+	err = action.Set(ws, "input", code)
+	if err != nil {
+		shareError(ws, fmt.Sprint("Error loading code", err))
+	}
+
 	return nil
 }
 
@@ -109,7 +173,35 @@ func runRumRepl(ws *websocket.Conn, app *valente.App, params []string) {
 
 func cleanRumRepl(ws *websocket.Conn, app *valente.App, params []string) {
 	action.HTML(ws, "output", "")
+	action.HTML(ws, "shareurl", "")
 	action.Set(ws, "input", "")
+}
+
+func shareError(ws *websocket.Conn, msg string) {
+	log.Println(msg)
+	action.HTML(ws, "shareurl", msg)
+}
+
+func shareRumRepl(ws *websocket.Conn, app *valente.App, params []string) {
+	code, err := action.Get(ws, "input")
+	if err != nil {
+		shareError(ws, fmt.Sprint("Error getting code", err))
+	}
+
+	uuid, err := uuid.NewV4()
+	if err != nil {
+		shareError(ws, fmt.Sprint("UUID", err))
+	}
+
+	err = ioutil.WriteFile(uuid.String()+".rum", []byte(code), 0644)
+	if err != nil {
+		shareError(ws, fmt.Sprint("Error saving code", err))
+	}
+
+	action.HTML(ws, "shareurl", `
+             <div class="alert alert-success" role="alert">
+	       <b>URL to share:</b> http://playground.rumlang.org/?`+uuid.String()+
+		"</div>")
 }
 
 //Initialize inits the Rumrepl Form
@@ -118,6 +210,7 @@ func (form RumReplForm) Initialize(ws *websocket.Conn) valente.Form {
 
 	f := form.AddEventHandler("run", runRumRepl)
 	f = f.AddEventHandler("clean", cleanRumRepl)
+	f = f.AddEventHandler("share", shareRumRepl)
 
 	return f
 }
