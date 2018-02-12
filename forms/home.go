@@ -87,7 +87,7 @@ func (form RumReplForm) Render(ws *websocket.Conn, app *valente.App, params []st
 	content.AddElement(elements.Heading3{Text: "The Rum Playground"})
 
 	rowbtn := elements.Panel{}
-	rowbtn.AddClass("row")
+	rowbtn.AddClass("row d-flex justify-content-between m-1")
 
 	btnRun := elements.Button{Text: "Run", PostBack: []string{"run"}}
 	btnRun.AddClass("btn btn-primary col-3")
