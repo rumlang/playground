@@ -82,7 +82,6 @@ func main() {
 			gcStepSession()
 		}
 	}()
-
 	fs := http.FileServer(assetFS())
 	http.Handle("/", fs)
 

@@ -151,6 +151,15 @@ func (form RumReplForm) Render(ws *websocket.Conn, app *valente.App, params []st
 }
 
 func runRumRepl(ws *websocket.Conn, app *valente.App, params []string) {
+	defer func() {
+		if r := recover(); r != nil {
+			err, ok := r.(error)
+			if !ok {
+				err = fmt.Errorf("unable to get panic: %v", r)
+			}
+			log.Println(err)
+		}
+	}()
 	context, ok := app.Data["runContext"]
 	if !ok {
 		context = runtime.NewContext(nil)
@@ -167,9 +176,10 @@ func runRumRepl(ws *websocket.Conn, app *valente.App, params []string) {
 		v, err := rumEval(code, context.(*runtime.Context))
 		if err != nil {
 			action.Append(ws, "output", fmt.Sprint("<p>Err: ", err, "</p><br/>"))
-		}
+		} else {
+			action.Append(ws, "output", "<p>-> "+fmt.Sprintf("%v</p>", (*v).Value()))
 
-		action.Append(ws, "output", "<p>-> "+fmt.Sprintf("%v</p>", (*v).Value()))
+		}
 
 		action.Exec(ws, "$('#output').scrollTop($('#output')[0].scrollHeight)")
 	}
